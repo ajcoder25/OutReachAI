@@ -1,4 +1,3 @@
-
 # Outreach AI
 
 A modern, professional email outreach automation tool for B2B professionals, marketers, and sales teams. Outreach AI helps you upload contacts, design personalized email templates, preview results, and download ready-to-send emails in bulk.
