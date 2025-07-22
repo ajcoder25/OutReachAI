@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,17 +19,45 @@ export function TemplateEditor({ headers, contacts, onTemplateComplete, onBack }
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const subjectRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const sampleContact = contacts[0] || {};
 
+  // Insert placeholder at cursor position for body
   const insertPlaceholder = (field: string) => {
     const placeholder = `{{${field}}}`;
-    setBody(prev => prev + placeholder);
+    if (bodyRef.current) {
+      const textarea = bodyRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newValue = body.slice(0, start) + placeholder + body.slice(end);
+      setBody(newValue);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+      }, 0);
+    } else {
+      setBody(prev => prev + placeholder);
+    }
   };
 
+  // Insert placeholder at cursor position for subject
   const insertSubjectPlaceholder = (field: string) => {
     const placeholder = `{{${field}}}`;
-    setSubject(prev => prev + placeholder);
+    if (subjectRef.current) {
+      const input = subjectRef.current;
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const newValue = subject.slice(0, start) + placeholder + subject.slice(end);
+      setSubject(newValue);
+      setTimeout(() => {
+        input.focus();
+        input.selectionStart = input.selectionEnd = start + placeholder.length;
+      }, 0);
+    } else {
+      setSubject(prev => prev + placeholder);
+    }
   };
 
   const previewContent = useMemo(() => {
@@ -115,6 +143,7 @@ export function TemplateEditor({ headers, contacts, onTemplateComplete, onBack }
                       onChange={(e) => setSubject(e.target.value)}
                       placeholder="Enter your email subject..."
                       className="text-base"
+                      ref={subjectRef}
                     />
                   </div>
                 </CardContent>
@@ -134,6 +163,7 @@ export function TemplateEditor({ headers, contacts, onTemplateComplete, onBack }
                       onChange={(e) => setBody(e.target.value)}
                       placeholder="Write your email message here..."
                       className="min-h-[300px] text-base leading-relaxed"
+                      ref={bodyRef}
                     />
                   </div>
                 </CardContent>
